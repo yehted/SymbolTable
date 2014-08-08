@@ -6,9 +6,7 @@
 * A symbol table implements the associative array abstraction: when 
 * associating a value with a key that is already in the symbol table, the
 * convention is to replace the old value with the new value.
-* The class also uses the convention that values cannot be null. Setting
-* the value associated with a key to null is equivalent to deleting the key
-* from the symbol table.
+* Values are allowed to be 0 in this implementation.
 *
 * This implementation uses a singly-linked list and sequential search. It
 * relies on the equals() method to test whether two keys are equal. It does 
@@ -20,6 +18,8 @@
 * For additional documentation, see Section 3.1 of Algorithms, 4th edition,
 * by Robert Sedgewick and Kevin Wayne
 *************************************************************************/
+#ifndef SEQUENTIALSEARCHST_H
+#define SEQUENTIALSEARCHST_H
 
 #include <Bag\Bag\Bag.h>
 
@@ -36,15 +36,15 @@ public:
 
 	Value get(Key key) {
 		for (Node* x = first_; x != NULL; x = x->next_)
-			if (key == x->key_) return *(x->val_);
+			if (key == x->key_) return x->val_;
 		return NULL;
 	}
 
-	void put(Key key, Value& val) {
-		if (val == NULL) { erase(key); return; }
+	void put(Key key, Value val) {
+//		if (val == NULL) { erase(key); return; }
 		for (Node* x = first_; x != NULL; x = x->next_) {
 			if (key == x->key_) {
-				x->val_ = &val;
+				x->val_ = val;
 				return;
 			}
 		}
@@ -67,10 +67,10 @@ private:
 	class Node {
 	public:
 		Node();
-		Node(Key key, Value& val, Node* next) : key_(key), val_(&val), next_(next) {}
+		Node(Key key, Value val, Node* next) : key_(key), val_(val), next_(next) {}
 	
 		Key key_;
-		Value* val_;
+		Value val_;
 		Node* next_;
 	};
 
@@ -84,3 +84,4 @@ private:
 	int N_;
 	Node* first_;
 };
+#endif // !SEQUENTIALSEARCHST_H

@@ -1,12 +1,13 @@
 #include "SequentialSearchST.h"
 #include <Deque\Deque\Deque.h>
+#include <functional>
 
 template <class Key, class Value>
 class SeparateChainingHashST {
 public:
 	SeparateChainingHashST() : SeparateChainingHashST(INIT_CAPACITY) {}
 	
-	SeparateChainingHashST(int M) : M_(M), st_(new SequentialSearchST<Key, Value>[M]) {}
+	SeparateChainingHashST(int M) : N_(0), M_(M), st_(new SequentialSearchST<Key, Value>[M]) {}
 
 	void resize(int chains) {
 		SeparateChainingHashST temp(chains);
@@ -32,7 +33,7 @@ public:
 	}
 
 	void put(Key key, Value val) {
-		if (val == NULL) { erase(key); return; }
+//		if (val == NULL) { erase(key); return; }
 
 		// double table size if average length of list >= 10
 		if (N_ >= 10 * M_) resize(2 * M_);
@@ -46,7 +47,7 @@ public:
 
 	void erase(Key key) {
 		int i = hash(key);
-		if (st_[i].contains(key)) N--;
+		if (st_[i].contains(key)) N_--;
 		st_[i].erase(key);
 
 		// halve table size if average length of list <= 2
@@ -64,11 +65,12 @@ public:
 
 private:
 	int hash(Key key) {
-		
+		std::hash<Key> h;
+		return h(key) % M_;
 	}
 
 	static const int INIT_CAPACITY = 4;
-	int N_;									// number of key-value pairs
-	int M_;									// hash table size
+	int N_;										// number of key-value pairs
+	int M_;										// hash table size
 	SequentialSearchST<Key, Value>* st_;		// array of unordered_map symbol tables
 };
