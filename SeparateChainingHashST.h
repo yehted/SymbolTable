@@ -9,8 +9,33 @@ public:
 	
 	SeparateChainingHashST(int M) : N_(0), M_(M), st_(new SequentialSearchST<Key, Value>[M]) {}
 
+	~SeparateChainingHashST() {
+		printf("Deleting SeparateChainingHashST\n");
+		delete[] st_;
+	}
+
+	SeparateChainingHashST(const SeparateChainingHashST& other) : N_(other.N_), M_(other.M_), st_(new SequentialSearchST<Key, Value>[other.M_]) {
+		printf("Copying SeparateChainingHashST\n");
+		for (int i = 0; i < M_; i++)
+			st_[i] = other.st_[i];
+	}
+
+	SeparateChainingHashST& operator=(const SeparateChainingHashST& other) {
+		printf("Assigning SeparateChainingHashST\n");
+		if (&other == this) return *this;
+		delete[] st_;
+		temp = new SequentialSearchST<Key, Value>[other.M_];
+		for (int i = 0; i < M_; i++)
+			temp[i] = other.st_[i];
+
+		M_ = other.M_;
+		N_ = other.N_;
+		st_ = temp;
+		return *this;
+	}
+
 	void resize(int chains) {
-		SeparateChainingHashST temp(chains);
+		SeparateChainingHashST temp = new SeparateChainingHashST(chains);
 		for (int i = 0; i < M_; i++) {
 			for (Key key : st_[i].keys()) {
 				temp.put(key, st_[i].get(key));
@@ -25,7 +50,10 @@ public:
 
 	bool isEmpty() { return N_ == 0; }
 
-	bool contains(Key key) { return get(key) != NULL; }
+	bool contains(Key key) { 
+		int i = hash(key);
+		return st_[i].contains(key);
+	}
 
 	Value get(Key key) {
 		int i = hash(key);
@@ -40,9 +68,7 @@ public:
 
 		int i = hash(key);
 		if (!st_[i].contains(key)) N_++;
-		st_[i].put(key, val);
-
-		
+		st_[i].put(key, val);		
 	}
 
 	void erase(Key key) {

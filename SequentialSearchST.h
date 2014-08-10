@@ -32,12 +32,12 @@ public:
 
 	bool isEmpty() { return N_ == 0; }
 
-	bool contains(Key key) { return get(key) != NULL; }
+	bool contains(Key key) { return find(key) != NULL; }
 
 	Value get(Key key) {
-		for (Node* x = first_; x != NULL; x = x->next_)
-			if (key == x->key_) return x->val_;
-		return NULL;
+		Node* x = find(key);
+		if (x == NULL) throw std::out_of_range("Key not found");
+		return x->val_;
 	}
 
 	void put(Key key, Value val) {
@@ -73,6 +73,12 @@ private:
 		Value val_;
 		Node* next_;
 	};
+
+	Node* find(Key key) {
+		for (Node* x = first_; x != NULL; x = x->next_)
+			if (key == x->key_) return x;
+		return NULL;
+	}
 
 	Node* erase(Node* x, Key key) {
 		if (x == NULL) return NULL;
