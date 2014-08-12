@@ -28,6 +28,59 @@ class SequentialSearchST {
 public:
 	SequentialSearchST() : first_(NULL), N_(0) {}
 
+	~SequentialSearchST() {
+		Node* current = first_;
+		while (current != NULL) {
+			first_ = first_->next_;
+			delete current;
+			current = first_;
+		}
+	}
+
+	SequentialSearchST(const SequentialSearchST& other) : N_(other.N_) {
+		Node* current = other.first_;
+		Node* temp = NULL;
+		while (current != NULL) {
+			Node* node = new Node(current->key_, current->val_, NULL);
+			if (temp == NULL)
+				first_ = node;
+			else
+				temp->next_ = node;
+			temp = node;
+			current = current->next_;
+		}
+	}
+
+	SequentialSearchST& operator=(const SequentialSearchST& other) {
+		if (&other == this) return *this;
+		
+		// Free existing memory
+		Node* current = first_;
+		while (first_ != NULL) {
+			current = first_->next_;
+			delete first_;
+			first_ = current;
+		}
+
+		// Allocate new memory and copy elements
+		N_ = 0;
+		current = other.first_;
+		Node* temp = NULL;
+		while (current != NULL) {
+			Node* node = new Node(current->key_, current->val_, NULL);
+			if (temp == NULL)
+				first_ = node;
+			else
+				temp->next_ = node;
+			temp = node;
+			current = current->next_;
+			N_++;
+		}
+
+		if (N_ != other.N_) printf("Copying error\n");
+		return *this;
+	}
+
 	int size() { return N_; }
 
 	bool isEmpty() { return N_ == 0; }
@@ -66,7 +119,7 @@ public:
 private:
 	class Node {
 	public:
-		Node();
+		Node() {}
 		Node(Key key, Value val, Node* next) : key_(key), val_(val), next_(next) {}
 	
 		Key key_;

@@ -1,3 +1,6 @@
+#ifndef SEPARATECHAININGHASHST_H
+#define SEPARATECHAININGHASHST_H
+
 #include "SequentialSearchST.h"
 #include <Deque\Deque\Deque.h>
 #include <functional>
@@ -24,7 +27,7 @@ public:
 		printf("Assigning SeparateChainingHashST\n");
 		if (&other == this) return *this;
 		delete[] st_;
-		temp = new SequentialSearchST<Key, Value>[other.M_];
+		SequentialSearchST<Key, Value>* temp = new SequentialSearchST<Key, Value>[other.M_];
 		for (int i = 0; i < M_; i++)
 			temp[i] = other.st_[i];
 
@@ -35,15 +38,20 @@ public:
 	}
 
 	void resize(int chains) {
-		SeparateChainingHashST temp = new SeparateChainingHashST(chains);
+		printf("Resizing hash ST\n");
+	//	SeparateChainingHashST<Key, Value>* temp = new SeparateChainingHashST<Key, Value>(chains);
+		SequentialSearchST<Key, Value>* temp = new SequentialSearchST<Key, Value>[chains];
 		for (int i = 0; i < M_; i++) {
 			for (Key key : st_[i].keys()) {
-				temp.put(key, st_[i].get(key));
+	//			temp->put(key, st_[i].get(key));
+				int x = hash(key, chains);
+				int y = hash(key, M_);
+				temp[x].put(key, st_[y].get(key));
 			}
 		}
-		M_ = temp.M_;
-		N_ = temp.N_;
-		st_ = temp.st_;
+		delete[] st_;
+		M_ = chains;
+		st_ = temp;
 	}
 
 	int size() { return N_; }
@@ -51,12 +59,12 @@ public:
 	bool isEmpty() { return N_ == 0; }
 
 	bool contains(Key key) { 
-		int i = hash(key);
+		int i = hash(key, M_);
 		return st_[i].contains(key);
 	}
 
 	Value get(Key key) {
-		int i = hash(key);
+		int i = hash(key, M_);
 		return st_[i].get(key);
 	}
 
@@ -66,7 +74,7 @@ public:
 		// double table size if average length of list >= 10
 		if (N_ >= 10 * M_) resize(2 * M_);
 
-		int i = hash(key);
+		int i = hash(key, M_);
 		if (!st_[i].contains(key)) N_++;
 		st_[i].put(key, val);		
 	}
@@ -90,9 +98,9 @@ public:
 	}
 
 private:
-	int hash(Key key) {
+	int hash(Key key, int M) {
 		std::hash<Key> h;
-		return h(key) % M_;
+		return (h(key) & 0x7fffffff) % M;
 	}
 
 	static const int INIT_CAPACITY = 4;
@@ -100,3 +108,4 @@ private:
 	int M_;										// hash table size
 	SequentialSearchST<Key, Value>* st_;		// array of unordered_map symbol tables
 };
+#endif // !SEPARATECHAININGHASHST_H
